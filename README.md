@@ -22,6 +22,41 @@ Transfer the generated `ikev2-vpn.mobileconfig` file to your local computer via 
 
 - **OS X 10.11 El Capitan or later**: Double click the `.mobileconfig` file to start the *profile installation* wizard.
 
+## Usage for Windows
+
+### Server
+
+#### 1. Build docker image
+
+    docker build -t vpn/ikev2 github.com/tsl0922/docker-ikev2-vpn-server
+
+#### 2. Start the IKEv2 VPN Server
+
+    docker run -d --name ikev2-vpn-server --restart=always --privileged -p 500:500/udp -p 4500:4500/udp -e "CERT_CN=Your_Server_IP_Address" -e "VPN_USER=Your_User_Name" -e "VPN_PASSWORD=Your_Password" vpn/ikev2
+    
+*Replace `Your_Server_IP_Address`, `Your_User_Name` and `Your_Password`.*
+
+#### 3. Copy Cert file
+
+    docker cp ikev2-vpn-server:/etc/ipsec.d/cacerts/caCert.pem ./
+    
+Copy this `caCert.pem` file to your Windows computer.
+
+### Client
+
+#### 1. Install Cert
+
+    certutil –addstore -enterprise –f “Root” caCert.pem
+    
+#### 2. Add VPN Connection
+
+#### 3. Bug fix
+
+You may need to fix this.
+
+    get-vpnconnection    # view vpn connections
+    set-vpnconnection "vpn-name" -splittunneling $false    #disable split tunneling
+
 ## Technical Details
 
 Upon container creation, a *shared secret* was generated for authentication purpose, no *certificate*, *username*, or *password* was ever used, simple life!
